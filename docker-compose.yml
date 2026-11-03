@@ -1,0 +1,62 @@
+services:
+  nginx:
+    image: nginx:1.25-alpine
+    ports:
+      - 8080:80
+    volumes:
+      - ./server/:/var/www
+      - ./server/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - api
+    networks:
+      - contato-seguro-slim-network
+
+  frontend:
+    build:
+      context: ./client
+    working_dir: /app
+    volumes:
+      - ./client/:/app
+    depends_on:
+      - api
+    ports:
+      - 5100:5173
+    networks:
+      - contato-seguro-slim-network
+    env_file:
+      - .env.dev
+
+  api:
+    build:
+      context: ./server
+    working_dir: /var/www
+    volumes:
+      - ./server/:/var/www
+      - composer-cache:/root/.composer/cache
+    networks:
+      - contato-seguro-slim-network
+    depends_on:
+      - database
+    env_file:
+      - .env.dev
+
+  database:
+    image: mysql:8.0
+    volumes:
+      - database-data:/var/lib/mysql
+    networks:
+      - contato-seguro-slim-network
+    ports:
+      - 3306:3306
+    env_file:
+      - .env.dev
+
+networks:
+  contato-seguro-slim-network:
+    driver: bridge
+
+volumes:
+  database-data:
+    driver: local
+  composer-cache:
+    driver: local
