@@ -12,7 +12,7 @@
 
 ## Restrições globais
 
-- **Nenhum arquivo de `server/` é criado, editado ou removido.**
+- **Nenhum arquivo de** `server/` **é criado, editado ou removido.**
 - Todo texto visível ao usuário é em **português (PT-BR)**.
 - Estilo do ESLint do projeto: 4 espaços, aspas simples, ponto e vírgula, imports ordenados nos grupos `react` → `antd` → pacotes → `@/` → relativos.
 - Imports absolutos com `@domain/*` e `@pages/*`.
@@ -28,7 +28,7 @@ Entradas e falhas que o design implica, mas que nenhum passo exercita sozinho:
 
 1. **CPF colado com pontuação** (`123.456.789-01`) no formulário deve ser aceito e enviado como `12345678901`. → Coberto na Tarefa 3, passo de verificação manual.
 2. **Data de nascimento deslocada em um dia** por fuso horário ao abrir a edição. → Coberto na Tarefa 3 (editar pessoa e conferir que a data não mudou).
-3. **Envolvimento com `person: null`** (pessoa excluída) não pode quebrar a tabela de envolvidos. → Coberto na Tarefa 6 (excluir pessoa vinculada e abrir o relato).
+3. **Envolvimento com** `person: null` (pessoa excluída) não pode quebrar a tabela de envolvidos. → Coberto na Tarefa 6 (excluir pessoa vinculada e abrir o relato).
 4. **URL de relato inexistente ou inválida** (`/records/9999`, `/records/abc`) deve mostrar estado vazio com volta, não tela branca. → Coberto na Tarefa 6.
 5. **Falha parcial no carregamento do anonimato** na listagem: uma chamada com erro não pode travar a tabela nem as outras linhas. → Coberto na Tarefa 7 (célula mostra "—").
 
@@ -38,8 +38,8 @@ Entradas e falhas que o design implica, mas que nenhum passo exercita sozinho:
 
 **Arquivos:** nenhum.
 
-- [ ] **Passo 1: Subir o ambiente e popular o banco** (README, seção Instalação, passos 3 a 7).
-- [ ] **Passo 2: Registrar a linha de base da checagem de tipos e do lint**
+- [x] **Passo 1: Subir o ambiente e popular o banco** (README, seção Instalação, passos 3 a 7).
+- [x] **Passo 2: Registrar a linha de base da checagem de tipos e do lint**
 
 Run: `docker compose exec frontend pnpm lint:tsc && docker compose exec frontend pnpm lint`
 Expected: ambos terminam sem erros. Se já houver erros no código original, anotá-los aqui; eles não são responsabilidade das tarefas seguintes.
@@ -49,19 +49,20 @@ Expected: ambos terminam sem erros. Se já houver erros no código original, ano
 ### Tarefa 1: Utilitários compartilhados (CPF e mensagens de erro)
 
 **Arquivos:**
+
 - Create: `client/src/domain/@shared/cpf.ts`
 - Create: `client/src/domain/@shared/api-error-message.ts`
 
 **Interfaces:**
+
 - Produces:
   - `onlyDigits(value: string): string` — remove tudo que não é dígito.
   - `formatCpf(value: string): string` — formata progressivamente até `000.000.000-00` (aceita entrada parcial, usado na máscara do input).
   - `maskCpf(value: string): string` — `12345678901` → `***.456.789-**` (D5).
   - `translateApiError: MakeMessage` — `(response: Service.ServerException) => string | null`, compatível com o 3º argumento de `handleServiceError`.
 
-- [ ] **Passo 1: Implementar `cpf.ts`** com as três funções acima.
-- [ ] **Passo 2: Implementar `translateApiError`** com um mapa de `error.description` (texto exato da API) → mensagem PT-BR:
-
+- [x] **Passo 1: Implementar** `cpf.ts` com as três funções acima.
+- [x] **Passo 2: Implementar** `translateApiError` com um mapa de `error.description` (texto exato da API) → mensagem PT-BR:
   | Descrição da API | Mensagem |
   | --- | --- |
   | `CPF already registered` | Este CPF já está cadastrado. |
@@ -74,21 +75,21 @@ Expected: ambos terminam sem erros. Se já houver erros no código original, ano
   | `Involvement not found` | Vínculo não encontrado. |
   | `Person already involved in this record` | Esta pessoa já está vinculada a este relato. |
   | `Person ID is required` / `Type is required` | Selecione a pessoa. / Selecione o tipo de envolvimento. |
-
   Descrição desconhecida com `statusCode >= 500` → "Não foi possível concluir a operação. Se a pessoa ou o vínculo já foi removido antes, o sistema pode estar impedindo o recadastro." (R2). Qualquer outra desconhecida → `null` (cai na descrição original, comportamento atual do helper).
-
   Antes de fechar o mapa, conferir as strings exatas em `server/src/Services/*.php` (leitura apenas), em especial a de relato inexistente.
-- [ ] **Passo 3: Verificar**
+- [x] **Passo 3: Verificar**
 
 Run: `docker compose exec frontend pnpm lint:tsc && docker compose exec frontend pnpm lint`
 Expected: sem erros.
-- [ ] **Passo 4: Commit** — `feat(shared): adiciona utilitários de CPF e tradução de erros da API`
+
+- [x] **Passo 4: Commit** — `feat(shared): adiciona utilitários de CPF e tradução de erros da API`
 
 ---
 
 ### Tarefa 2: Domínio Pessoa — tipos e serviços
 
 **Arquivos:**
+
 - Create: `client/src/domain/person/person.type.ts`
 - Create: `client/src/domain/person/api/list-people.service.ts`
 - Create: `client/src/domain/person/api/create-person.service.ts`
@@ -96,6 +97,7 @@ Expected: sem erros.
 - Create: `client/src/domain/person/api/delete-person.service.ts`
 
 **Interfaces:**
+
 - Produces:
   - `namespace Person { type Model = { id: number; name: string; cpf: string; email: string; birth_date: string; created_at: string; updated_at: string | null; deleted_at: string | null } }`
   - `type Person.Body = Pick<Person.Model, 'name' | 'cpf' | 'email' | 'birth_date'>`
@@ -104,7 +106,7 @@ Expected: sem erros.
   - `updatePerson(id: Person.Model['id'], body: Person.Body)` → `{ person: Person.Model }` — `PUT /people/{id}`
   - `deletePerson(id: Person.Model['id'])` → sem `data` — `DELETE /people/{id}`
 
-- [ ] **Passo 1: Criar o tipo e os quatro serviços**, copiando a forma de `domain/company/api/*` (JSDoc `@service/@route/@http` incluso). `GET /people/{id}` não é usado por nenhuma tela e fica de fora (YAGNI).
+- [ ] **Passo 1: Criar o tipo e os quatro serviços**, copiando a forma de `domain/company/api/`* (JSDoc `@service/@route/@http` incluso). `GET /people/{id}` não é usado por nenhuma tela e fica de fora (YAGNI).
 - [ ] **Passo 2: Verificar** — `pnpm lint:tsc && pnpm lint` sem erros.
 - [ ] **Passo 3: Commit** — `feat(person): adiciona tipos e serviços de pessoa`
 
@@ -113,6 +115,7 @@ Expected: sem erros.
 ### Tarefa 3: Tela de Pessoas (`/people`)
 
 **Arquivos:**
+
 - Create: `client/src/domain/person/People.context.tsx`
 - Create: `client/src/domain/person/components/PersonFields.tsx`
 - Create: `client/src/domain/person/components/CreatePersonModal.tsx`
@@ -123,20 +126,21 @@ Expected: sem erros.
 - Modify: `client/src/MainLayout.tsx` (item "Pessoas", ícone `TeamOutlined`, entre Empresas e Relatos)
 
 **Interfaces:**
+
 - Consumes: Tarefa 1 (`formatCpf`, `maskCpf`, `onlyDigits`, `translateApiError`), Tarefa 2 (serviços e `Person.*`).
 - Produces:
   - `PeopleContextProvider` / `usePeopleContext()` com o mesmo `Value` de `Companies.context.tsx`, trocando `company*` por `person*` e `fetchCompanies` por `fetchPeople`.
   - `CreatePersonModal({ onCreated?: (person: Person.Model) => void })` — usado também na Tarefa 6.
 
-- [ ] **Passo 1: `People.context.tsx`** — cópia do padrão de `Companies.context.tsx`.
-- [ ] **Passo 2: `PersonFields.tsx`** com `Values = Person.Body`:
+- [ ] **Passo 1:** `People.context.tsx` — cópia do padrão de `Companies.context.tsx`.
+- [ ] **Passo 2:** `PersonFields.tsx` com `Values = Person.Body`:
   - `name`: obrigatório.
   - `cpf`: obrigatório e `pattern: /^\d{11}$/` ("O CPF deve ter 11 dígitos."). O form guarda **só dígitos** e o input mostra formatado: `normalize={onlyDigits}` + `getValueProps={value => ({ value: formatCpf(value ?? '') })}`, `maxLength={14}`.
   - `email`: obrigatório + `type: 'email'`.
   - `birth_date`: obrigatório, `DatePicker` com `format="DD/MM/YYYY"`, `disabledDate={d => d.isAfter(dayjs(), 'day')}`, `style={{ width: '100%' }}`. O form guarda a string `YYYY-MM-DD`: `getValueProps={v => ({ value: v ? dayjs(v, 'YYYY-MM-DD') : undefined })}` + `normalize={(d: Dayjs | null) => d?.format('YYYY-MM-DD')}`.
-- [ ] **Passo 3: `CreatePersonModal` e `EditPersonModal`** — padrão dos modais de empresa, passando `translateApiError` ao `handleServiceError`. O de criação, após sucesso, chama `fetchPeople()` e depois `onCreated?.(response.data.person)`.
-- [ ] **Passo 4: `PeopleActionsCell`** — padrão de `CompaniesActionsCell`; descrição do Popconfirm: "Tem certeza que deseja excluir esta pessoa? Ela continuará aparecendo nos relatos aos quais está vinculada." (R4).
-- [ ] **Passo 5: `People.page.tsx`** — título "Pessoas", botão "Cadastrar", `Input.Search` "Buscar por nome ou CPF" (`allowClear`) e tabela com colunas ID (`#id`), Nome, CPF (`maskCpf`), E-mail, Nascimento (`DD/MM/AAAA`) e ações. Filtro local: nome contém o termo (sem diferenciar maiúsculas) **ou** `cpf` contém `onlyDigits(termo)` quando houver dígitos.
+- [ ] **Passo 3:** `CreatePersonModal` **e** `EditPersonModal` — padrão dos modais de empresa, passando `translateApiError` ao `handleServiceError`. O de criação, após sucesso, chama `fetchPeople()` e depois `onCreated?.(response.data.person)`.
+- [ ] **Passo 4:** `PeopleActionsCell` — padrão de `CompaniesActionsCell`; descrição do Popconfirm: "Tem certeza que deseja excluir esta pessoa? Ela continuará aparecendo nos relatos aos quais está vinculada." (R4).
+- [ ] **Passo 5:** `People.page.tsx` — título "Pessoas", botão "Cadastrar", `Input.Search` "Buscar por nome ou CPF" (`allowClear`) e tabela com colunas ID (`#id`), Nome, CPF (`maskCpf`), E-mail, Nascimento (`DD/MM/AAAA`) e ações. Filtro local: nome contém o termo (sem diferenciar maiúsculas) **ou** `cpf` contém `onlyDigits(termo)` quando houver dígitos.
 - [ ] **Passo 6: Rota e menu.**
 - [ ] **Passo 7: Verificar tipos e lint** — `pnpm lint:tsc && pnpm lint` sem erros.
 - [ ] **Passo 8: Verificação manual** em `https://localhost:5100/people`:
@@ -154,6 +158,7 @@ Expected: sem erros.
 ### Tarefa 4: Domínio Envolvimento — tipos, rótulos e serviços
 
 **Arquivos:**
+
 - Create: `client/src/domain/involvement/involvement.type.ts`
 - Create: `client/src/domain/involvement/involvement.constants.ts`
 - Create: `client/src/domain/involvement/api/list-involvements.service.ts`
@@ -161,6 +166,7 @@ Expected: sem erros.
 - Create: `client/src/domain/involvement/api/delete-involvement.service.ts`
 
 **Interfaces:**
+
 - Consumes: `Person.Model` (Tarefa 2), `Record.Model['id']`.
 - Produces:
   - `namespace Involvement { type Type = 'whistleblower' | 'witness' | 'victim' | 'denounced'; type Model = { id: number; type: Type; record_id: number; person_id: number; created_at: string; updated_at: string | null; deleted_at: string | null; person: Person.Model | null } }` — `person` anulável por R3.
@@ -180,9 +186,11 @@ Expected: sem erros.
 ### Tarefa 5: Tag de anonimato
 
 **Arquivos:**
+
 - Create: `client/src/domain/involvement/components/AnonymityTag.tsx`
 
 **Interfaces:**
+
 - Produces:
   - `type AnonymityStatus = 'loading' | 'anonymous' | 'identified' | 'error'` (exportado do mesmo arquivo).
   - `AnonymityTag({ status }: { status: AnonymityStatus })` — `loading`: `Spin size="small"`; `anonymous`: `Tag` laranja com `EyeInvisibleOutlined` "Anônimo"; `identified`: `Tag` azul com `UserOutlined` "Identificado"; `error`: texto "—" com `title="Não foi possível verificar"`.
@@ -196,6 +204,7 @@ Expected: sem erros.
 ### Tarefa 6: Detalhe do relato (`/records/:id`)
 
 **Arquivos:**
+
 - Create: `client/src/domain/involvement/use-record-involvements.ts`
 - Create: `client/src/domain/involvement/components/InvolvementsTable.tsx`
 - Create: `client/src/domain/involvement/components/CreateInvolvementModal.tsx`
@@ -203,20 +212,21 @@ Expected: sem erros.
 - Modify: `client/src/router.tsx` (rota `/records/:id`)
 
 **Interfaces:**
+
 - Consumes: Tarefas 1, 3 (`PeopleContextProvider`, `usePeopleContext`, `CreatePersonModal`), 4 e 5; `findRecord` e `CompaniesContextProvider` existentes.
 - Produces:
   - `useRecordInvolvements(recordId: number): { involvements: Involvement.Model[]; isAnonymous: boolean | null; isLoading: boolean; fetchInvolvements: () => Promise<void> }` — busca ao montar; em erro chama `handleServiceError(app, response, translateApiError)`.
   - `InvolvementsTable({ involvements, recordId, isLoading, onChange: () => void })`.
   - `CreateInvolvementModal({ recordId, involvedPersonIds: number[], onClose: () => void, onCreated: () => void })`.
 
-- [ ] **Passo 1: `use-record-involvements.ts`.**
-- [ ] **Passo 2: `InvolvementsTable`** (usa `@domain/@shared/Table`): colunas Nome, CPF (`formatCpf`, **completo** — D5), E-mail, Tipo (`Tag` com rótulo e cor da Tarefa 4) e ação remover (Popconfirm "Remover vínculo" / "Tem certeza que deseja remover esta pessoa do relato?" → `deleteInvolvement` → `onChange()`). Linha com `person === null`: Nome "Pessoa removida" em `Typography.Text type="secondary"` e "—" nas colunas de pessoa (R3).
-- [ ] **Passo 3: `CreateInvolvementModal`** — `Form` com:
+- [ ] **Passo 1:** `use-record-involvements.ts`**.**
+- [ ] **Passo 2:** `InvolvementsTable` (usa `@domain/@shared/Table`): colunas Nome, CPF (`formatCpf`, **completo** — D5), E-mail, Tipo (`Tag` com rótulo e cor da Tarefa 4) e ação remover (Popconfirm "Remover vínculo" / "Tem certeza que deseja remover esta pessoa do relato?" → `deleteInvolvement` → `onChange()`). Linha com `person === null`: Nome "Pessoa removida" em `Typography.Text type="secondary"` e "—" nas colunas de pessoa (R3).
+- [ ] **Passo 3:** `CreateInvolvementModal` — `Form` com:
   - `person_id`: `Select` obrigatório, `showSearch`, opções de `usePeopleContext().people` com `label` `"<nome> — <formatCpf(cpf)>"`; pessoas em `involvedPersonIds` ficam `disabled` com sufixo " (já vinculada)" (D4). `filterOption` compara o termo com o label em minúsculas e também `onlyDigits(termo)` com o CPF.
   - Abaixo do select: `Button type="link"` "Cadastrar nova pessoa" → `setIsCreateModalVisible(true)` do contexto de pessoas; renderiza `<Show when={isCreateModalVisible}><CreatePersonModal onCreated={p => form.setFieldValue('person_id', p.id)} /></Show>`.
   - `type`: `Select` obrigatório com `INVOLVEMENT_TYPE_OPTIONS`.
   - Envio: `createInvolvement` → em erro `handleServiceError(app, response, translateApiError)`; em sucesso `onCreated()` e `onClose()`.
-- [ ] **Passo 4: `RecordDetail.page.tsx`**:
+- [ ] **Passo 4:** `RecordDetail.page.tsx`:
   - Lê `id` com `useParams`; se `Number(id)` não for inteiro positivo, já renderiza o estado de não encontrado.
   - Busca o relato com `findRecord`. Resposta 404 (ou `id` inválido) → `Result status="404"` "Relato não encontrado" com botão "Voltar para relatos" (Review Focus 4). Outros erros → `handleServiceError`.
   - Envolve o conteúdo em `CompaniesContextProvider` (nome da empresa via `companies.find`) e `PeopleContextProvider` (select do modal).
@@ -240,15 +250,17 @@ Expected: sem erros.
 ### Tarefa 7: Listagem de relatos — identificação, filtros e link
 
 **Arquivos:**
+
 - Create: `client/src/domain/involvement/use-anonymity-by-record.ts`
 - Modify: `client/src/pages/Records.page.tsx`
 
 **Interfaces:**
+
 - Consumes: `listInvolvements` (Tarefa 4), `AnonymityStatus` e `AnonymityTag` (Tarefa 5), `useCompaniesContext` existente.
 - Produces: `useAnonymityByRecord(records: Record.Model[]): Map<Record.Model['id'], AnonymityStatus>` — ao mudar `records`, marca todos como `loading` e dispara `listInvolvements` de todos em paralelo (`Promise.all`); cada resultado atualiza só a sua entrada (`anonymous` / `identified` / `error`). Não notifica erro por linha (evita uma notificação por relato); a célula mostra "—" (Review Focus 5).
 
 - [ ] **Passo 1: Implementar o hook.**
-- [ ] **Passo 2: Evoluir `Records.page.tsx`**:
+- [ ] **Passo 2: Evoluir** `Records.page.tsx`:
   - Colunas passam para dentro do componente (precisam do mapa de anonimato).
   - Título vira `<Link to={`/records/${id}`}>`.
   - Nova coluna "Identificação" com `AnonymityTag`.
@@ -267,6 +279,7 @@ Expected: sem erros.
 ### Tarefa 8: Evidências dos testes manuais
 
 **Arquivos:**
+
 - Create: `docs/MANUAL_TESTS.md`
 - Create: `docs/evidencias/` (capturas de tela, ao menos uma por épico)
 
