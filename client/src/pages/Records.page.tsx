@@ -8,6 +8,7 @@ import { Table } from '@domain/@shared/Table';
 import { CompaniesContextProvider, useCompaniesContext } from '@domain/company/Companies.context';
 import { type AnonymityStatus, AnonymityTag } from '@domain/involvement/components/AnonymityTag';
 import { useAnonymityByRecord } from '@domain/involvement/use-anonymity-by-record';
+import { PeopleContextProvider } from '@domain/person/People.context';
 import { CreateRecordModal } from '@domain/record/components/CreateRecordModal';
 import { EditRecordModal } from '@domain/record/components/EditRecordModal';
 import { RecordsActionsCell } from '@domain/record/components/RecordsActionsCell';
@@ -34,7 +35,11 @@ export function Records() {
         <CompaniesContextProvider>
             {() => (
                 <RecordsContextProvider>
-                    {() => <RecordsView />}
+                    {() => (
+                        <PeopleContextProvider>
+                            {() => <RecordsView />}
+                        </PeopleContextProvider>
+                    )}
                 </RecordsContextProvider>
             )}
         </CompaniesContextProvider>

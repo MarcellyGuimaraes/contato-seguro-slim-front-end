@@ -2,6 +2,7 @@ import { Fragment } from 'react';
 
 import { Form, Input, Select } from 'antd';
 
+import { Show } from '@domain/@shared/Show';
 import type { Company } from '@domain/company/company.type';
 
 import type { Record } from '../record.type';
@@ -22,9 +23,10 @@ export type Values = {
 
 type Props = {
     companies: Company.Model[];
+    showStatus?: boolean;
 };
 
-export function RecordFields({ companies }: Props) {
+export function RecordFields({ companies, showStatus = true }: Props) {
     return (
         <Fragment>
             <Form.Item<Values>
@@ -43,13 +45,15 @@ export function RecordFields({ companies }: Props) {
                 <Input.TextArea rows={4} placeholder="Descreva o ocorrido com o máximo de detalhes possível" />
             </Form.Item>
 
-            <Form.Item<Values>
-                name="status"
-                label="Status"
-                rules={[{ required: true, message: 'Por favor, selecione um status.' }]}
-            >
-                <Select options={STATUS_OPTIONS} placeholder="Selecione um status" />
-            </Form.Item>
+            <Show when={showStatus}>
+                <Form.Item<Values>
+                    name="status"
+                    label="Status"
+                    rules={[{ required: true, message: 'Por favor, selecione um status.' }]}
+                >
+                    <Select options={STATUS_OPTIONS} placeholder="Selecione um status" />
+                </Form.Item>
+            </Show>
 
             <Form.Item<Values>
                 name="company_id"
