@@ -4,11 +4,11 @@ import { App, Button, Divider, Form, Modal, Select } from 'antd';
 
 import { UserAddOutlined } from '@ant-design/icons';
 import { translateApiError } from '@domain/@shared/api-error-message';
-import { formatCpf, onlyDigits } from '@domain/@shared/cpf';
 import { handleServiceError, hasServiceError } from '@domain/@shared/service.helper';
 import { Show } from '@domain/@shared/Show';
 import { sleep } from '@domain/@shared/sleep';
 import { CreatePersonModal } from '@domain/person/components/CreatePersonModal';
+import { PersonSelect } from '@domain/person/components/PersonSelect';
 import { usePeopleContext } from '@domain/person/People.context';
 import type { Person } from '@domain/person/person.type';
 import type { Record } from '@domain/record/record.type';
@@ -18,13 +18,6 @@ import { INVOLVEMENT_TYPE_OPTIONS } from '../involvement.constants';
 import type { Involvement } from '../involvement.type';
 
 type Values = Involvement.Body;
-
-type PersonOption = {
-    value: Person.Model['id'];
-    label: string;
-    cpf: string;
-    disabled: boolean;
-};
 
 type Props = {
     recordId: Record.Model['id'];
@@ -37,8 +30,6 @@ export function CreateInvolvementModal({ recordId, involvedPersonIds, onClose, o
     const [isSending, setIsSending] = useState(false);
 
     const {
-        people,
-        isLoading: isLoadingPeople,
         isCreateModalVisible: isCreatePersonModalVisible,
         setIsCreateModalVisible: setIsCreatePersonModalVisible,
     } = usePeopleContext();
@@ -46,28 +37,6 @@ export function CreateInvolvementModal({ recordId, involvedPersonIds, onClose, o
     const [form] = Form.useForm<Values>();
 
     const app = App.useApp();
-
-    const personOptions: PersonOption[] = people.map(person => {
-        const isInvolved = involvedPersonIds.includes(person.id);
-
-        return {
-            value: person.id,
-            label: `${person.name} — ${formatCpf(person.cpf)}${isInvolved ? ' (já vinculada)' : ''}`,
-            cpf: person.cpf,
-            disabled: isInvolved,
-        };
-    });
-
-    const filterPersonOption = (input: string, option?: PersonOption) => {
-        if (!option)
-            return false;
-
-        const term = input.trim().toLowerCase();
-        const digits = onlyDigits(input);
-
-        return option.label.toLowerCase().includes(term)
-            || (digits.length > 0 && option.cpf.includes(digits));
-    };
 
     const handlePersonCreated = (person: Person.Model) => {
         form.setFieldValue('person_id', person.id);
@@ -124,12 +93,9 @@ export function CreateInvolvementModal({ recordId, involvedPersonIds, onClose, o
                         </Button>
                     )}
                 >
-                    <Select
-                        options={personOptions}
-                        placeholder="Busque por nome ou CPF"
-                        loading={isLoadingPeople}
-                        showSearch
-                        filterOption={filterPersonOption}
+                    <PersonSelect
+                        disabledPersonIds={involvedPersonIds}
+                        disabledSuffix="(já vinculada)"
                     />
                 </Form.Item>
 
